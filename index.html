@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Registration Form</title>
+</head>
+
+<body>
+    <main class="flex flex-col min-h-screen justify-center py-6 bg-gray-50">
+        <section class="bg-white p-6 shadow-xl ring-1 ring-gray-900/5 mx-auto max-w-lg rounded-lg">
+            <h1 class="text-3xl text-center font-bold">Survey Form</h1>
+            <form id="registrationForm" class="mt-6 space-y-5 text-gray-700">
+                <div>
+                    <label for="fullName" class="font-medium">Name</label>
+                    <input required type="text" id="fullName" name="fullName" placeholder="Enter full name"
+                        class="w-full bg-gray-100 rounded-lg shadow-md px-4 py-3 placeholder-gray-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="userEmail" class="font-medium">Email</label>
+                    <input required type="email" id="userEmail" name="userEmail" placeholder="Enter email"
+                        class="w-full bg-gray-100 rounded-lg shadow-md px-4 py-3 placeholder-gray-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="userPassword" class="font-medium">Password</label>
+                    <input required type="password" id="userPassword" name="userPassword" placeholder="Enter password"
+                        class="w-full bg-gray-100 rounded-lg shadow-md px-4 py-3 placeholder-gray-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="birthDate" class="font-medium">Date of Birth</label>
+                    <input required type="date" id="birthDate" name="birthDate"
+                        class="w-full bg-gray-100 rounded-lg shadow-md px-4 py-3 placeholder-gray-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-medium">
+                        <input required type="checkbox" id="termsCheck"> Accept Terms & Conditions
+                    </label>
+                </div>
+                <button type="submit"
+                    class="px-8 py-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-400 focus:outline-none">
+                    Submit
+                </button>
+            </form>
+        </section>
+
+        <section class="bg-white p-6 mt-6 shadow-xl ring-1 ring-gray-900/5 mx-auto max-w-lg rounded-lg">
+            <h2 class="text-3xl text-center font-bold">Entries</h2>
+            <div id="entriesDisplay" class="mt-4"></div>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const dateField = document.querySelector("#birthDate");
+            const today = new Date();
+            const pad = num => num.toString().padStart(2, '0');
+
+            const formatDate = (dateObj, offset) => {
+                const y = dateObj.getFullYear() - offset;
+                const m = pad(dateObj.getMonth() + 1);
+                const d = pad(dateObj.getDate());
+                return `${y}-${m}-${d}`;
+            };
+
+            dateField.min = formatDate(today, 55);
+            dateField.max = formatDate(today, 18);
+
+            const getStoredEntries = () => JSON.parse(localStorage.getItem("user-data") || "[]");
+
+            const showEntries = () => {
+                const entries = getStoredEntries();
+                const tableHead = `
+                    <table class="table-auto w-full">
+                        <thead><tr>
+                            <th class="px-4 py-2">Name</th>
+                            <th class="px-4 py-2">Email</th>
+                            <th class="px-4 py-2">Password</th>
+                            <th class="px-4 py-2">DOB</th>
+                            <th class="px-4 py-2">Accepted?</th>
+                        </tr></thead>
+                        <tbody>
+                `;
+
+                const rows = entries.map(entry => `
+                    <tr>
+                        <td class="border px-4 py-2">${entry.fullName}</td>
+                        <td class="border px-4 py-2">${entry.userEmail}</td>
+                        <td class="border px-4 py-2">${entry.userPassword}</td>
+                        <td class="border px-4 py-2">${entry.birthDate}</td>
+                        <td class="border px-4 py-2">${entry.termsAccepted}</td>
+                    </tr>
+                `).join('');
+
+                const table = tableHead + rows + "</tbody></table>";
+                document.getElementById("entriesDisplay").innerHTML = table;
+            };
+
+            const handleFormSubmit = e => {
+                e.preventDefault();
+                const formData = {
+                    fullName: document.querySelector("#fullName").value,
+                    userEmail: document.querySelector("#userEmail").value,
+                    userPassword: document.querySelector("#userPassword").value,
+                    birthDate: document.querySelector("#birthDate").value,
+                    termsAccepted: document.querySelector("#termsCheck").checked
+                };
+
+                const existingEntries = getStoredEntries();
+                existingEntries.push(formData);
+                localStorage.setItem("user-data", JSON.stringify(existingEntries));
+                showEntries();
+            };
+
+            document.getElementById("registrationForm").addEventListener("submit", handleFormSubmit);
+            showEntries();
+        })();
+    </script>
+</body>
+
+</html>
